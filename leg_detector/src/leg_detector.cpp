@@ -731,9 +731,12 @@ public:
 
       memcpy(tmp_mat.data, f.data(), f.size()*sizeof(float));
 
-      float probability = 0.5 -
-                          forest->predict(tmp_mat, cv::noArray(), cv::ml::RTrees::PREDICT_SUM) /
-                          forest->getRoots().size();
+      cv::Mat votes;
+
+      forest->getVotes(tmp_mat, votes, 0);
+      // first row of columns cotains class labels. Here -1 and 1.
+      // second row then contains the number of trees voting for this class.
+      float probability = static_cast<float>(votes.at<int>(1, 1)) / static_cast<float>(forest->getRoots().size());
 
       tf::Stamped<tf::Point> loc((*i)->center(), scan->header.stamp, scan->header.frame_id);
       try
