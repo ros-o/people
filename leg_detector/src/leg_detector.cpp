@@ -302,15 +302,13 @@ public:
 
     if (use_seeds_)
     {
-      people_notifier_.registerCallback(boost::bind(&LegDetector::peopleCallback, this, _1));
+      people_notifier_.registerCallback([this](auto msg){ peopleCallback(msg); });
       people_notifier_.setTolerance(ros::Duration(0.01));
     }
-    laser_notifier_.registerCallback(boost::bind(&LegDetector::laserCallback, this, _1));
+    laser_notifier_.registerCallback([this](auto scan){ laserCallback(scan); });
     laser_notifier_.setTolerance(ros::Duration(0.01));
 
-    dynamic_reconfigure::Server<leg_detector::LegDetectorConfig>::CallbackType f;
-    f = boost::bind(&LegDetector::configure, this, _1, _2);
-    server_.setCallback(f);
+    server_.setCallback([this](auto& config, uint32_t level){ configure(config, level); });
 
     feature_id_ = 0;
   }
